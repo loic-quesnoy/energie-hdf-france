@@ -1,8 +1,9 @@
 [project]
 name = "energie-hdf-france"
 version = "0.1.0"
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 dependencies = [
+    "loguru>=0.7.3",
     "numpy>=2.4.6",
     "polars>=1.41.2",
     "requests>=2.34.2",
