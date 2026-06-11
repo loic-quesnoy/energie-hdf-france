@@ -6,7 +6,7 @@ from loguru import logger
 
 logger.add("data/pipeline.log", rotation="10 MB", retention="10 days", level="INFO")
 
-def extract_regional_energy_data(region:str, date:str):
+def extract_regional_energy_data(region:str, date:str) -> Path:
     logger.info(f"Début de l'extraction des données depuis l'ODRÉ pour la date du {date} et la région {region}")
 
     try:
