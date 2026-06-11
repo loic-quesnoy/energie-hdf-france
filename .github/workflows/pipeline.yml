@@ -1,0 +1,29 @@
+name: Run Energy Pipeline with Env File
+
+on:
+  schedule:
+    - cron: '0 11 * * *'
+  workflow_dispatch:
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker Image
+        run: docker build -t energy-pipeline .
+
+      # ÉTAPE CLÉ : On écrit le fichier .env de manière dynamique
+      - name: Create .env file
+        run: |
+          echo "SUPABASE_HOST=${{ secrets.SUPABASE_HOST }}" >> .env
+          echo "SUPABASE_PORT=${{ secrets.SUPABASE_PORT }}" >> .env
+          echo "SUPABASE_DB=${{ secrets.SUPABASE_DB }}" >> .env
+          echo "SUPABASE_USER=${{ secrets.SUPABASE_USER }}" >> .env
+          echo "SUPABASE_PWD=${{ secrets.SUPABASE_PWD }}" >> .env
+
+      - name: Run Docker Container with Env File
+        # On passe directement le fichier généré, la commande reste ultra propre
+        run: docker run --rm --env-file .env --network=host energy-pipeline
