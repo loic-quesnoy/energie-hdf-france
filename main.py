@@ -1,6 +1,7 @@
 from loguru import logger
 import sys
 import datetime
+import polars as pl
 
 
 from src.extract import extract_regional_energy_data
@@ -16,13 +17,15 @@ def main():
 
     try:
         last_imported_date = get_last_imported_date()
-        date_to_import = last_imported_date + datetime.timedelta(days=1)
+        first_date_to_import = last_imported_date + datetime.timedelta(days=1)
+        dates_serie = pl.date_range(first_date_to_import, datetime.datetime.now().date() - datetime.timedelta(days=1), interval="1d", eager=True)
 
-        path = extract_regional_energy_data(REGION, date_to_import.strftime("%Y-%m-%d"))
+        for date in dates_serie:
+            path = extract_regional_energy_data(REGION, date.strftime("%Y-%m-%d"))
 
-        run_transformation(path)
+            run_transformation(path)
 
-        run_loading()
+            run_loading()
 
         logger.success("=== PIPELINE EXÉCUTÉ AVEC SUCCÈS DE A À Z ===")
 
