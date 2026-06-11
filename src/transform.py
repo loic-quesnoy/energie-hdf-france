@@ -28,36 +28,27 @@ def run_transformation(input_path:Path) -> None:
     df = df.with_columns(
         pl.col("date_heure").str.to_datetime("%Y-%m-%dT%H:%M:%S%z")
     )
+    df = df.sort("date_heure")
     df = df.with_columns(
         pl.col("stockage_batterie", "destockage_batterie").cast(pl.Int64)
     )
 
-    dim_date = df.select([
-    pl.col("date_heure").dt.date().alias("date_id"),
-    pl.col("date_heure").dt.year().alias("year"),
-    pl.col("date_heure").dt.month().alias("month"),
-    pl.col("date_heure").dt.day().alias("day"),
-]).unique()
-
-    fact_consumption = df.select([
-        pl.col("date_heure").dt.date().alias("date_id"),
-        pl.col("date_heure").dt.time().alias("time_id"),
+    hdf_consumption = df.select([
+        pl.col("date_heure").alias("datetime"),
         pl.col("consommation").alias("consumption_mwh")
     ])
 
-    fact_production = df.unpivot(
+    hdf_production = df.unpivot(
         index=["date_heure"],
         on=~cs.by_name("date_heure", "consommation"),
         variable_name="production_source",
         value_name="production_mwh"
     ).select([
-        pl.col("date_heure").dt.date().alias("date_id"),
-        pl.col("date_heure").dt.time().alias("time_id"),
+        pl.col("date_heure").alias("datetime"),
         pl.col("production_source"),
         pl.col("production_mwh")
     ])
 
-    dim_date.write_parquet("data/processed/dim_date.parquet")
-    fact_consumption.write_parquet("data/processed/fact_consumption.parquet")
-    fact_production.write_parquet("data/processed/fact_production.parquet")
+    hdf_consumption.write_parquet("data/processed/hdf_consumption.parquet")
+    hdf_production.write_parquet("data/processed/hdf_production.parquet")
     logger.success(f"Données nettoyées et sauvegardées en Parquet : {output_path}")
