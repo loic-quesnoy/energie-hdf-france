@@ -1,14 +1,15 @@
+import datetime
 import os
 from pathlib import Path
+
 import polars as pl
-from sqlalchemy import create_engine,text
+from dateutil.relativedelta import relativedelta
 from dotenv import load_dotenv
 from loguru import logger
-import datetime
-from dateutil.relativedelta import relativedelta
+from sqlalchemy import create_engine, text
 
 load_dotenv()
-DATABASE_URL = f"postgresql://{os.getenv("SUPABASE_USER")}:{os.getenv("SUPABASE_PWD")}@{os.getenv("SUPABASE_HOST")}:{os.getenv("SUPABASE_PORT")}/{os.getenv("SUPABASE_DB")}"
+DATABASE_URL = f"postgresql://{os.getenv('SUPABASE_USER')}:{os.getenv('SUPABASE_PWD')}@{os.getenv('SUPABASE_HOST')}:{os.getenv('SUPABASE_PORT')}/{os.getenv('SUPABASE_DB')}"
 
 
 def run_loading():
@@ -26,16 +27,17 @@ def run_loading():
 
     tables_to_load = [
         ("hdf_consumption.parquet", "hdf_consumption"),
-        ("hdf_production.parquet", "hdf_production")
+        ("hdf_production.parquet", "hdf_production"),
     ]
 
     try:
         for file_name, table_name in tables_to_load:
             file_path = processed_dir / file_name
 
-            # Vérification que le fichier Parquet existe bien sur le disque
             if not file_path.exists():
-                logger.warning(f"Le fichier {file_name} est introuvable dans {processed_dir}. Étape ignorée.")
+                logger.warning(
+                    f"Le fichier {file_name} est introuvable dans {processed_dir}. Étape ignorée."
+                )
                 continue
 
             logger.info(f"Lecture de {file_name}...")
@@ -43,11 +45,10 @@ def run_loading():
 
             logger.info(f"Insertion de {len(df)} lignes dans la table '{table_name}'...")
 
-            # Injection magique et optimisée de Polars vers PostgreSQL
             df.write_database(
                 table_name=table_name,
                 connection=engine,
-                if_table_exists="append"  # 'append' ajoute les lignes sans écraser la structure SQL
+                if_table_exists="append",
             )
             logger.success(f"Table '{table_name}' mise à jour avec succès.")
 
@@ -55,15 +56,12 @@ def run_loading():
 
     except Exception as e:
         logger.error(f"Une erreur critique est survenue lors du chargement : {e}")
-        # On propage l'erreur pour que le chef d'orchestre (main.py) sache que le pipeline a échoué
         raise e
 
 
 def get_last_imported_date() -> datetime.date:
-    """Interroge la base de données pour trouver la date la plus récente."""
     engine = create_engine(DATABASE_URL)
 
-    # On utilise un bloc try/except au cas où la table n'existe pas encore (premier lancement)
     try:
         with engine.connect() as connection:
             # Requête SQL pour choper la date maximale
@@ -75,7 +73,9 @@ def get_last_imported_date() -> datetime.date:
                 return result
             else:
                 logger.warning("La table existe mais elle est vide (Première insertion).")
-                return (datetime.date.today() - relativedelta(months=1)).replace(day=1) - datetime.timedelta(days=1)
+                return (datetime.date.today() - relativedelta(months=1)).replace(
+                    day=1
+                ) - datetime.timedelta(days=1)
 
     except Exception as e:
         logger.warning(f"Impossible de lire la dernière date : {e}")

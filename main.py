@@ -1,16 +1,17 @@
-from loguru import logger
-import sys
 import datetime
-import polars as pl
+import sys
 
+import polars as pl
+from loguru import logger
 
 from src.extract import extract_regional_energy_data
-from src.transform import run_transformation
 from src.load import get_last_imported_date, run_loading
+from src.transform import run_transformation
 
 logger.add("data/pipeline.log", rotation="10 MB", level="INFO")
 
 REGION = "Hauts-de-France"
+
 
 def main():
     logger.info("=== DÉMARRAGE DU PIPELINE ÉNERGÉTIQUE REGIONAL ===")
@@ -18,7 +19,12 @@ def main():
     try:
         last_imported_date = get_last_imported_date()
         first_date_to_import = last_imported_date + datetime.timedelta(days=1)
-        dates_serie = pl.date_range(first_date_to_import, datetime.datetime.now().date() - datetime.timedelta(days=1), interval="1d", eager=True)
+        dates_serie = pl.date_range(
+            first_date_to_import,
+            datetime.datetime.now().date() - datetime.timedelta(days=1),
+            interval="1d",
+            eager=True,
+        )
 
         for date in dates_serie:
             path = extract_regional_energy_data(REGION, date.strftime("%Y-%m-%d"))

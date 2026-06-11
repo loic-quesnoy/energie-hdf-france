@@ -1,4 +1,4 @@
-name: Run Energy Pipeline with Env File
+name: Run Energy Pipeline
 
 on:
   schedule:
