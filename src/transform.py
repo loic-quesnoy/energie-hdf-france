@@ -31,7 +31,7 @@ def run_transformation(input_path: Path) -> None:
                 f"Reçu : {actual_rows} lignes. Abandon de la transformation."
             )
             raise IncompleteDataError(
-                f"Le fichier {input_path.name} ne contient que {actual_rows}/{expected_rows} lignes."
+                f"Le fichier {input_path.name} ne contient que {actual_rows}/{expected_rows} lignes"
             )
 
         logger.info(f"Fichier brut charge avec succes. Lignes detectees : {actual_rows}")
