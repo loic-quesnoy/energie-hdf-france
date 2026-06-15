@@ -1,12 +1,13 @@
 import json
 from pathlib import Path
-import pytest
+
 import polars as pl
+import pytest
 import requests
 
 from src.extract import extract_regional_energy_data
+from src.load import get_last_imported_date, run_loading
 from src.transform import run_transformation
-from src.load import run_loading, get_last_imported_date
 
 
 @pytest.fixture
@@ -51,7 +52,7 @@ def test_extract_success(mocker, fake_json_data, tmp_path):
     output_file = extract_regional_energy_data(region="Hauts-de-France", date="2026-03-25")
 
     assert output_file.exists()
-    with open(output_file, "r") as f:
+    with open(output_file) as f:
         saved_data = json.load(f)
     assert saved_data["total_count"] == 2
 
