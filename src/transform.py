@@ -6,8 +6,12 @@ import polars.selectors as cs
 from loguru import logger
 
 
+class IncompleteDataError(Exception):
+    pass
+
+
 def run_transformation(input_path: Path) -> None:
-    logger.info("Démarrage de la brique Transformation...")
+    logger.info("Demarrage de la brique Transformation...")
 
     output_path = Path("data/processed/energy_clean_Hauts-de-France.parquet")
 
@@ -17,12 +21,25 @@ def run_transformation(input_path: Path) -> None:
         json_data = json.loads(input_path.read_text())
         df = pl.from_dicts(json_data["results"])
 
-        assert len(df) == 96
+        actual_rows = len(df)
+        expected_rows = 96
 
-        logger.info(f"Fichier brut chargé avec succès. Lignes détectées : {len(df)}")
+        if actual_rows != expected_rows:
+            logger.critical(
+                f"Donnees incompletes detectees ! "
+                f"Attendu : {expected_rows} lignes (journee complete), "
+                f"Reçu : {actual_rows} lignes. Abandon de la transformation."
+            )
+            raise IncompleteDataError(
+                f"Le fichier {input_path.name} ne contient que {actual_rows}/{expected_rows} lignes."
+            )
+
+        logger.info(f"Fichier brut charge avec succes. Lignes detectees : {actual_rows}")
+    except IncompleteDataError as e:
+        raise e
     except Exception as e:
-        logger.error(f"Impossible de lire le fichier JSON : {e}")
-        return
+        logger.error(f"Impossible de lire ou de valider le fichier JSON : {e}")
+        raise e
 
     df = df.drop(
         "code_insee_region",
@@ -58,4 +75,4 @@ def run_transformation(input_path: Path) -> None:
 
     hdf_consumption.write_parquet("data/processed/hdf_consumption.parquet")
     hdf_production.write_parquet("data/processed/hdf_production.parquet")
-    logger.success(f"Données nettoyées et sauvegardées en Parquet : {output_path}")
+    logger.success(f"Donnees nettoyees et sauvegardees en Parquet : {output_path}")

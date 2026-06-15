@@ -7,7 +7,7 @@ import requests
 
 from src.extract import extract_regional_energy_data
 from src.load import get_last_imported_date, run_loading
-from src.transform import run_transformation
+from src.transform import IncompleteDataError, run_transformation
 
 
 @pytest.fixture
@@ -118,3 +118,14 @@ def test_get_last_imported_date_empty_db(mocker):
     fallback_date = get_last_imported_date()
 
     assert fallback_date is not None
+
+
+def test_run_transformation_raises_error_on_incomplete_data(tmp_path):
+    # On crée un faux JSON qui n'a qu'UNE SEULE ligne au lieu de 96
+    bad_json_data = {"total_count": 1, "results": [{"consommation": 4000}]}
+    input_file = tmp_path / "incomplete_input.json"
+    input_file.write_text(json.dumps(bad_json_data))
+
+    # On vérifie que le code lève BIEN l'exception IncompleteDataError
+    with pytest.raises(IncompleteDataError):
+        run_transformation(input_file)

@@ -17,11 +17,8 @@ install:
 	uv sync
 
 # --- CODE QUALITY ---
-lint:
-	uv run ruff check .
-
-format:
-	uv run ruff format .
+lint-and-format:
+	uv run ruff check . --fix & uv run ruff format .
 
 test:
 	uv run ruff format --check .
