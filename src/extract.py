@@ -15,8 +15,10 @@ def extract_regional_energy_data(region: str, date: str) -> Path:
     )
 
     try:
-        url = (f"https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/eco2mix-regional-tr/records"
-               f"?where=libelle_region='{region}'and date='{date}'&order_by=heure&limit=100")
+        url = (
+            f"https://odre.opendatasoft.com/api/explore/v2.1/catalog/datasets/eco2mix-regional-tr/records"
+            f"?where=libelle_region='{region}'and date='{date}'&order_by=heure&limit=100"
+        )
         response = requests.get(url, timeout=30)
         response.raise_for_status()
 
