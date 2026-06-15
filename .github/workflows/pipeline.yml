@@ -35,11 +35,11 @@ jobs:
       # ÉTAPE CLÉ : On écrit le fichier .env de manière dynamique
       - name: Create .env file
         run: |
-          echo "SUPABASE_HOST=${{ secrets.SUPABASE_HOST }}" >> .env
-          echo "SUPABASE_PORT=${{ secrets.SUPABASE_PORT }}" >> .env
-          echo "SUPABASE_DB=${{ secrets.SUPABASE_DB }}" >> .env
-          echo "SUPABASE_USER=${{ secrets.SUPABASE_USER }}" >> .env
-          echo "SUPABASE_PWD=${{ secrets.SUPABASE_PWD }}" >> .env
+          echo 'SUPABASE_HOST=${{ secrets.SUPABASE_HOST }}' > .env
+          echo 'SUPABASE_PORT=${{ secrets.SUPABASE_PORT }}' >> .env
+          echo 'SUPABASE_DB=${{ secrets.SUPABASE_DB }}' >> .env
+          echo 'SUPABASE_USER=${{ secrets.SUPABASE_USER }}' >> .env
+          echo 'SUPABASE_PWD=${{ secrets.SUPABASE_PWD }}' >> .env
 
       - name: Run Docker Container with Env File
         # On passe directement le fichier généré, la commande reste ultra propre

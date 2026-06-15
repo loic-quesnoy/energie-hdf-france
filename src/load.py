@@ -36,7 +36,7 @@ def run_loading():
 
             if not file_path.exists():
                 logger.warning(
-                    f"Le fichier {file_name} est introuvable dans {processed_dir}. Étape ignorée."
+                    f"Le fichier {file_name} est introuvable dans {processed_dir}. Étape ignoree."
                 )
                 continue
 
@@ -50,9 +50,9 @@ def run_loading():
                 connection=engine,
                 if_table_exists="append",
             )
-            logger.success(f"Table '{table_name}' mise à jour avec succès.")
+            logger.success(f"Table '{table_name}' mise à jour avec succes.")
 
-        logger.success("=== LE CHARGEMENT DANS SUPABASE EST TERMINÉ===")
+        logger.success("=== LE CHARGEMENT DANS SUPABASE EST TERMINE===")
 
     except Exception as e:
         logger.error(f"Une erreur critique est survenue lors du chargement : {e}")
@@ -64,18 +64,17 @@ def get_last_imported_date() -> datetime.date:
 
     try:
         with engine.connect() as connection:
-            # Requête SQL pour choper la date maximale
             query = text("SELECT MAX(datetime) AT TIME ZONE 'Europe/Paris' FROM hdf_consumption")
             result = connection.execute(query).scalar()
 
             if result is not None:
-                logger.info(f"Dernière date trouvée en base de données : {result}")
+                logger.info(f"Derniere date trouvée en base de donnees : {result}")
                 return result
             else:
-                logger.warning("La table existe mais elle est vide (Première insertion).")
+                logger.warning("La table existe mais elle est vide (Premiere insertion).")
                 return (datetime.date.today() - relativedelta(months=1)).replace(
                     day=1
                 ) - datetime.timedelta(days=1)
 
     except Exception as e:
-        logger.warning(f"Impossible de lire la dernière date : {e}")
+        logger.warning(f"Impossible de lire la derniere date : {e}")
