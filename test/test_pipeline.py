@@ -8,6 +8,7 @@ from src.extract import extract_regional_energy_data
 from src.transform import run_transformation
 from src.load import run_loading, get_last_imported_date
 
+
 @pytest.fixture
 def fake_json_data():
     return {
@@ -33,9 +34,9 @@ def fake_json_data():
                 "destockage_batterie": "0",
                 "tco_thermique": 8.97,
                 "tch_thermique": 17.53,
-                "column_68": None
+                "column_68": None,
             }
-        ]
+        ],
     }
 
 
@@ -61,6 +62,7 @@ def test_extract_api_failure(mocker):
     with pytest.raises(requests.exceptions.RequestException):
         extract_regional_energy_data(region="Hauts-de-France", date="2026-03-25")
 
+
 def test_run_transformation_logic(mocker, fake_json_data, tmp_path):
     input_file = tmp_path / "raw_input.json"
     input_file.write_text(json.dumps(fake_json_data))
@@ -75,7 +77,9 @@ def test_run_transformation_logic(mocker, fake_json_data, tmp_path):
 
         real_write_parquet(df, target_path, *args, **kwargs)
 
-    mocker.patch.object(pl.DataFrame, "write_parquet", autospec=True, side_effect=mock_write_parquet)
+    mocker.patch.object(
+        pl.DataFrame, "write_parquet", autospec=True, side_effect=mock_write_parquet
+    )
 
     run_transformation(input_file)
 
@@ -90,6 +94,7 @@ def test_run_transformation_logic(mocker, fake_json_data, tmp_path):
     assert "datetime" in df_cons.columns
     assert "consumption_mwh" in df_cons.columns
     assert df_cons["consumption_mwh"][0] == 4682
+
 
 def test_run_loading_missing_files(mocker):
     mocker.patch("src.load.create_engine")
