@@ -77,4 +77,5 @@ def get_last_imported_date() -> datetime.date:
                 ) - datetime.timedelta(days=1)
 
     except Exception as e:
-        logger.warning(f"Impossible de lire la derniere date : {e}")
+        logger.error(f"Impossible de lire la derniere date : {e}")
+        raise ValueError(f"Impossible de lire la derniere date : {e}")
