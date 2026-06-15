@@ -56,6 +56,14 @@ def run_transformation(input_path: Path) -> None:
     df = df.sort("date_heure")
     df = df.with_columns(pl.col("stockage_batterie", "destockage_batterie").cast(pl.Int64))
 
+    # Vérifier qu'il n'y a pas de valeurs négatives aberrantes dans la consommation
+    if df.filter(pl.col("consommation") < 0).height > 0:
+        raise ValueError("Des valeurs de consommation négatives ont été détectées !")
+
+    # Vérifier qu'il n'y a pas de doublons temporels
+    if df["date_heure"].is_duplicated().any():
+        raise ValueError("Doublons détectés sur les horodatages !")
+
     hdf_consumption = df.select(
         [pl.col("date_heure").alias("datetime"), pl.col("consommation").alias("consumption_mwh")]
     )
