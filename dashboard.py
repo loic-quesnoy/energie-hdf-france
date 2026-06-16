@@ -263,8 +263,8 @@ if isinstance(date_range, tuple) and len(date_range) == 2:
                 df_cons_chart = df_cons_filtered.with_columns(
                     (
                         (
-                            (pl.col("consumption_mwh") - pl.col("consumption_mwh").shift(1))
-                            / pl.col("consumption_mwh").shift(1)
+                            (pl.col("consumption_mwh") - pl.col("consumption_mwh").shift(4))
+                            / pl.col("consumption_mwh").shift(4)
                         )
                         * 100
                     ).alias("y_axis")
@@ -283,6 +283,9 @@ if isinstance(date_range, tuple) and len(date_range) == 2:
                 labels={"datetime": "Date / Heure", "y_axis": y_label},
                 color_discrete_sequence=["#FF4B4B"],
             )
+            # --- AJOUT DU RÉFÉRENTIEL VISUEL ET DU TEXTE EXPLICATIF ---
+            if metric_choice == "Variation horaire (%)":
+                st.info("💡 Variation par rapport à la dernière heure")
             st.plotly_chart(fig_cons, use_container_width=True)
 
         with col_droite:
