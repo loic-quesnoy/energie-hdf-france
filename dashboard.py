@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 import datetime
 import os
 
@@ -153,7 +154,7 @@ if isinstance(date_range, tuple) and len(date_range) == 2:
     # Nouvelle petite description textuelle
     st.markdown(
         """
-        Bienvenue sur cet outil de Business Intelligence dédié au suivi énergétique de la région **Hauts-de-France**. 
+        Bienvenue sur cet outil de Business Intelligence dédié au suivi énergétique de la région **Hauts-de-France**.
         Ce dashboard interroge en continu une base de données Cloud alimentée par les flux temps réel de l'API Éco2mix de RTE disponibles sur l'ODRE (https://opendata.reseaux-energies.fr/).
 
         * **Onglet 1 (Vue Globale) :** Explorez la consommation régionale, analysez l'indépendance de la région grâce au taux d'autosuffisance et décortiquez la nature du mix électrique (Vert vs Nucléaire vs Fossile).
