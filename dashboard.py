@@ -124,10 +124,12 @@ except Exception as e:
     st.error(f"Erreur Supabase : {e}")
     df_cons, df_prod, df_stockage_brut = get_mock_data()
 
+### Barre latérale
+
 st.sidebar.header("📅 Période d'analyse")
 min_date = df_cons["datetime"].min().date()
 max_date = df_cons["datetime"].max().date()
-default_start_date = max_date - datetime.timedelta(days=7)  # 1 semaine par défaut
+default_start_date = max_date - datetime.timedelta(days=7)
 
 date_range = st.sidebar.date_input(
     label="Sélectionnez une plage de dates :",
@@ -147,11 +149,41 @@ if isinstance(date_range, tuple) and len(date_range) == 2:
         pl.col("datetime").is_between(start_datetime, end_datetime)
     )
 
+    st.sidebar.divider()
+    st.sidebar.subheader("📥 Exporter les données filtrées")
+    st.sidebar.markdown(
+        "<small>Téléchargez les données correspondant à la période sélectionnée ci-dessus.</small>",
+        unsafe_allow_html=True,
+    )
+
+    csv_cons = df_cons_filtered.to_pandas().to_csv(index=False).encode("utf-8")
+    df_prod_export = df_prod_filtered.with_columns(
+        pl.col("production_source").str.to_titlecase().alias("Filière")
+    ).to_pandas()
+    csv_prod = df_prod_export.to_csv(index=False).encode("utf-8")
+
+    st.sidebar.download_button(
+        label="📊 Télécharger la Consommation (CSV)",
+        data=csv_cons,
+        file_name=f"consommation_hdf_{start_date}_au_{end_date}.csv",
+        mime="text/csv",
+        key="download_cons",
+    )
+
+    st.sidebar.download_button(
+        label="🏭 Télécharger la Production (CSV)",
+        data=csv_prod,
+        file_name=f"production_hdf_{start_date}_au_{end_date}.csv",
+        mime="text/csv",
+        key="download_prod",
+    )
+
+    ### Description
+
     st.title("⚡ Dashboard Énergétique — Hauts-de-France")
     st.markdown(
         f"Analyse du **{start_date.strftime('%d/%m/%Y')}** au **{end_date.strftime('%d/%m/%Y')}**"
     )
-    # Nouvelle petite description textuelle
     st.markdown(
         """
         Bienvenue sur cet outil de Business Intelligence dédié au suivi énergétique de la région **Hauts-de-France**.
@@ -163,7 +195,11 @@ if isinstance(date_range, tuple) and len(date_range) == 2:
     )
     st.divider()
 
+    ### TAB
+
     tab_global, tab_battery = st.tabs(["📊 Vue Globale & Mix", "🔋 Zoom Stockage & Batteries"])
+
+    ### KPI
 
     with tab_global:
         if df_cons_filtered.height > 0 and df_prod_filtered.height > 0:
@@ -283,7 +319,6 @@ if isinstance(date_range, tuple) and len(date_range) == 2:
                 labels={"datetime": "Date / Heure", "y_axis": y_label},
                 color_discrete_sequence=["#FF4B4B"],
             )
-            # --- AJOUT DU RÉFÉRENTIEL VISUEL ET DU TEXTE EXPLICATIF ---
             if metric_choice == "Variation horaire (%)":
                 st.info("💡 Variation par rapport à la dernière heure")
             st.plotly_chart(fig_cons, use_container_width=True)
